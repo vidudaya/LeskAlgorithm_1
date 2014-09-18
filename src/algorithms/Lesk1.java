@@ -32,12 +32,13 @@ public class Lesk1 {
 	public static String leskSolve(String userContext ,String word) throws JWNLException{
 		WORD = dictionary.getIndexWord(POS.NOUN, word);
 		List<String> glosses = indexedWordCheck(WORD);
-		String meaning =findBestMatch(glosses,userContext);
+		String meaning =findBestMatch(glosses,userContext.toLowerCase());
 		
 		return meaning;
 	}
 	
 	public static String findBestMatch(List<String> glosses,String userContext){
+		List<String> ignoreWrds = Arrays.asList("a","the", "of",  "in", "at","on");
 		int sol[] = new int[glosses.size()];
 		int i=-1;
 		
@@ -45,18 +46,20 @@ public class Lesk1 {
 		
 		for(String gloss : glosses){
 			i++;
-			List<String> gloss_  = Arrays.asList(gloss.replaceAll("[^a-zA-Z ]", "").split(""));
-			
-			for(String s : context){
-				for(String glo : gloss_){
-					if(s.contains(glo) || glo.contains(s)){
-						sol[i]++;
+			List<String> gloss_  = Arrays.asList(gloss.replaceAll("[^a-zA-Z ]", "").split(" ")); 
+			 
+				for(String s : context){
+					if(ignoreWrds.contains(s))continue;
+					for(String glo : gloss_){
+						if(!ignoreWrds.contains(glo) && (s.contains(glo) || glo.contains(s))){
+							sol[i]++;
+						}
 					}
 				}
-			}
+			 
 		}
 		
-		//System.out.println(Arrays.toString(sol));
+		System.out.println(Arrays.toString(sol));
 		int max =Integer.MIN_VALUE,pos=-1;
 		for(i=0;i<sol.length;++i){
 			if(max<sol[i] ){
@@ -76,7 +79,7 @@ public class Lesk1 {
 		
 		for(Synset syn : list){
 			//System.out.println(syn.getGloss());
-			glosses.add(syn.getGloss());
+			glosses.add(syn.getGloss().toLowerCase());
 		}
 		return glosses;
 	}
